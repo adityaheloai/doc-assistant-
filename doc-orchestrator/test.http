@@ -1,0 +1,55 @@
+### Health Check
+GET http://localhost:3000/health
+
+### Test 1 - Python venv
+POST http://localhost:3000/questions
+Content-Type: application/json
+
+{
+  "asked_by": "dev@example.com",
+  "subject": "Python venv",
+  "body": "How do I create a virtual environment in Python?"
+}
+
+### Test 2 - RabbitMQ
+POST http://localhost:3000/questions
+Content-Type: application/json
+
+{
+  "asked_by": "dev@example.com",
+  "subject": "RabbitMQ",
+  "body": "What is the purpose of a RabbitMQ queue?"
+}
+
+### Test 3 - PostgreSQL Node.js
+POST http://localhost:3000/questions
+Content-Type: application/json
+
+{
+  "asked_by": "dev@example.com",
+  "subject": "PostgreSQL",
+  "body": "How do I connect to PostgreSQL from Node.js?"
+}
+
+### Test 4 - FastAPI
+POST http://localhost:3000/questions
+Content-Type: application/json
+
+{
+  "asked_by": "dev@example.com",
+  "subject": "FastAPI",
+  "body": "What is FastAPI and when should I use it?"
+}
+
+### Test 5 - Qdrant
+POST http://localhost:3000/questions
+Content-Type: application/json
+
+{
+  "asked_by": "dev@example.com",
+  "subject": "Qdrant",
+  "body": "How does Qdrant store vectors?"
+}
+
+### Get Answer (questionId replace karo)
+GET http://localhost:3000/questions/f95555f1-77bc-4a5e-9d83-7814601e987b/answer
