@@ -1,7 +1,8 @@
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
-require('dotenv').config({ 
-  path: path.join(__dirname, '../../.env') 
+require('dotenv').config({
+  path: path.join(__dirname, '../../.env')
 });
 
 const db = require('./db');
@@ -11,6 +12,7 @@ const questionsRouter = require('./routes/questions');
 const app = express();
 const PORT = process.env.ORCHESTRATOR_PORT || 3000;
 
+app.use(cors());
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -24,8 +26,7 @@ app.get('/health', async (req, res) => {
   try {
     const dbTime = await db.healthCheck();
     const mqOk = await queue.healthCheck();
-
-    const status = {
+    return res.status(200).json({
       status: 'ok',
       service: 'doc-orchestrator',
       timestamp: new Date().toISOString(),
@@ -33,13 +34,8 @@ app.get('/health', async (req, res) => {
         postgres: dbTime ? 'healthy' : 'unhealthy',
         rabbitmq: mqOk ? 'healthy' : 'unhealthy'
       }
-    };
-
-    console.log('[HEALTH] Check passed');
-    return res.status(200).json(status);
-
+    });
   } catch (err) {
-    console.error(`[HEALTH] Check failed: ${err.message}`);
     return res.status(503).json({
       status: 'error',
       message: err.message
