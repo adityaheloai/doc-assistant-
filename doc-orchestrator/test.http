@@ -8,7 +8,7 @@ Content-Type: application/json
 {
   "asked_by": "dev@example.com",
   "subject": "Python venv",
-  "body": "How do I create a virtual environment in Python?"
+  "body": "can we solve DSA in python?"
 }
 
 ### Test 2 - RabbitMQ
@@ -52,4 +52,4 @@ Content-Type: application/json
 }
 
 ### Get Answer (questionId replace karo)
-GET http://localhost:3000/questions/f95555f1-77bc-4a5e-9d83-7814601e987b/answer
+GET http://localhost:3000/questions/325eb24f-00f4-4672-abb3-e632a01ea922/answer
