@@ -21,7 +21,7 @@ qdrant = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 logger.info("[SEARCH] Model and Qdrant client ready")
 
 
-def search_documents(query, top_k=3):
+def search_documents(query, top_k=2):
 
     try:
         logger.info(f"[SEARCH] Query: {query[:60]}...")

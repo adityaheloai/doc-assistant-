@@ -47,7 +47,7 @@ def call_ollama(prompt):
                 "prompt": prompt,
                 "stream": False
             },
-            timeout=60
+            timeout=30
         )
         response.raise_for_status()
         result = response.json()

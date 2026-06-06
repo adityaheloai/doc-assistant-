@@ -40,6 +40,14 @@ npm install
 
 ---
 
+# Doc Assistant — Commands Reference
+
+## EK COMMAND SE SAB (Daily Run)
+
+```bash
+cd ~/Desktop/doc-assistant
+docker-compose up -d
+
 ## DAILY RUN
 
 ### Terminal 1 — Infrastructure
