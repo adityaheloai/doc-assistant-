@@ -23,7 +23,7 @@ RabbitMQ  (publish questionId)
     ↓
 Python Worker  (consume)
     ↓
-Qdrant  (vector search — top 3 docs)
+Qdrant  (vector search — top 2 docs)
     ↓
 Ollama tinyllama  (generate answer)
     ↓
@@ -36,17 +36,17 @@ GET /questions/:id/answer → Developer
 
 ## Services
 
-| Service              | Tech          | Port        |
-|----------------------|---------------|-------------|
-| doc-orchestrator     | Node.js 18    | 3000        |
-| doc-ai-engine        | Python 3.12   | —           |
-| doc-ingest           | Python 3.12   | —           |
-| doc-ui               | React         | 3001        |
-| PostgreSQL           | v15           | 5432        |
-| RabbitMQ             | v3            | 5672/15672  |
-| Qdrant               | latest        | 6333        |
-| Ollama (tinyllama)   | latest        | 11434       |
-| pgAdmin              | latest        | 5050        |
+| Service            | Tech        | Port       |
+|--------------------|-------------|------------|
+| doc-ui             | React       | 3000       |
+| doc-orchestrator   | Node.js 18  | 3001       |
+| doc-ai-engine      | Python 3.11 | —          |
+| doc-ingest         | Python 3.11 | —          |
+| PostgreSQL         | v15         | 5432       |
+| RabbitMQ           | v3          | 5672/15672 |
+| Qdrant             | latest      | 6333       |
+| Ollama (tinyllama) | latest      | 11434      |
+| pgAdmin            | latest      | 5050       |
 
 ---
 
@@ -57,31 +57,26 @@ GET /questions/:id/answer → Developer
 git clone https://github.com/adityaheloai/doc-assistant-.git
 cd doc-assistant
 
-# 2. Environment
+# 2. Environment setup
 cp .env.example .env
 
-# 3. Infrastructure
-docker-compose up -d
+# 3. Build + Start sab kuch
+docker-compose up -d --build
+
+# 4. tinyllama download
 docker exec doc_ollama ollama pull tinyllama
 
-# 4. Ingest KB
+# 5. KB ingest
 cd doc-ingest
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt && python3 ingest.py
-
-# 5. AI Worker (Terminal 2)
-cd ../doc-ai-engine
-python3 -m venv venv && source venv/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
-cd src && python3 main.py
+python3 ingest.py
+```
 
-# 6. Orchestrator (Terminal 3)
-cd ../../doc-orchestrator
-npm install && node src/index.js
-
-# 7. React UI (Terminal 4)
-cd ../doc-ui
-npm install && npm start
+**Phir bas:**
+```bash
+docker-compose up -d
 ```
 
 ---
@@ -90,7 +85,7 @@ npm install && npm start
 
 ### Submit Question
 ```
-POST http://localhost:3000/questions
+POST http://localhost:3001/questions
 Content-Type: application/json
 
 {
@@ -102,12 +97,12 @@ Content-Type: application/json
 
 ### Get Answer
 ```
-GET http://localhost:3000/questions/:id/answer
+GET http://localhost:3001/questions/:id/answer
 ```
 
 ### Health Check
 ```
-GET http://localhost:3000/health
+GET http://localhost:3001/health
 ```
 
 ---
@@ -132,10 +127,8 @@ CREATE TABLE ai_answers (
   classification TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-```
 
-### Indexes
-```sql
+-- Indexes
 CREATE INDEX idx_questions_processed_at ON questions(processed_at);
 CREATE INDEX idx_questions_asked_by ON questions(asked_by);
 CREATE INDEX idx_ai_answers_question_id ON ai_answers(question_id);
@@ -150,7 +143,7 @@ Queue: `doc_question_processing`
 
 ```json
 {
-  "questionId": "550e8400-e29b-41d4-a716-446655440000",
+  "questionId": "uuid-here",
   "askedBy": "dev@example.com"
 }
 ```
@@ -173,30 +166,26 @@ Queue: `doc_question_processing`
 
 6 documents across 4 channels:
 
-| Channel  | Files                          |
-|----------|--------------------------------|
-| python   | python_faq.md, venv_guide.md   |
-| fastapi  | fastapi_intro.md               |
-| postgres | postgres_guide.md              |
+| Channel  | Files                               |
+|----------|-------------------------------------|
+| python   | python_faq.md, venv_guide.md        |
+| fastapi  | fastapi_intro.md                    |
+| postgres | postgres_guide.md                   |
 | rabbitmq | rabbitmq_intro.md, rabbitmq_queues.md |
 
 ---
 
-## Changing KB Data (Production Use)
+## Changing KB Data
 
 ```bash
-# 1. Clear existing vectors
+# 1. Naye .md files daalo doc-ingest/kb/ mein
+# 2. Qdrant clear karo
 curl -X DELETE http://localhost:6333/collections/doc_knowledge
-
-# 2. Add new .md files to doc-ingest/kb/
-
 # 3. Re-ingest
-cd doc-ingest
-source venv/bin/activate
-python3 ingest.py
+cd doc-ingest && source venv/bin/activate && python3 ingest.py
 ```
 
-No other code changes needed.
+Koi aur code change nahi karna.
 
 ---
 
@@ -227,15 +216,16 @@ doc-assistant/
 │       ├── search.py
 │       └── llm.py
 ├── doc-ingest/
-│   ├── Dockerfile
 │   ├── requirements.txt
 │   ├── ingest.py
+│   ├── download_kb.py
 │   └── kb/
 │       ├── python/
 │       ├── fastapi/
 │       ├── postgres/
 │       └── rabbitmq/
 └── doc-ui/
+    ├── Dockerfile
     ├── package.json
     └── src/
         └── App.js
